@@ -7,11 +7,12 @@ keyword_pattern = re.compile(r'(\b(lsc|jcc|zbc|ywc|yyc)\.\w+\b)', flags=re.IGNOR
 #筛选出'from'关键字，以后可能会补充 as 等其他关键字
 from_pattern = re.compile(r'from', flags=re.IGNORECASE)
 
-class analyze_lines:
-    def __init__(self, lines):
+class analyze_file:
+    def __init__(self, input_file):
         self.source = set()
         self.target = set()
-        self.lines = lines
+        self.input_file = input_file
+        self.lines = comment_filter(input_file.read())
 
     def source_target_finder(self, line):
         keywords = re.findall(keyword_pattern, line)
@@ -34,15 +35,16 @@ class analyze_lines:
         print self.target 
 
     def demo(self):
+        print self.input_file
         self.process_file()
         self.print_result()
+        print ''
 
         
 
 if __name__ == '__main__':
     f = open('KHFX_KHPJBQL_KHCYCPBQ_D.sql', 'r')
-    lines = comment_filter(f.read())
-    clean_f = analyze_lines(lines)
+    clean_f = analyze_file(f)
     clean_f.demo()
 
     
