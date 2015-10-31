@@ -1,5 +1,6 @@
 #encoding:utf-8
 import re
+#过滤多行注释，接收多行脚本，返回多行脚本(作为一个整体)
 def multipleline_comment_filter(lines):
     cursor_begin = 0
     comment_begin = 0
@@ -15,55 +16,29 @@ def multipleline_comment_filter(lines):
     return out_str
 
 
+#过滤单行注释，接收单行脚本，返回单行脚本
 def singleline_comment_filter(line):
     if line.find('--') != -1 :
         return line[:line.find('--')]
     else:
         return line
 
-if __name__ == '__main__':
-    f = open('KHFX_KHPJBQL_KHCYCPBQ_D.sql', 'r')
-    content = f.read()
-    multi_comment_striped = multipleline_comment_filter(content)
-    lines = multi_comment_striped.split('\n')
+
+#过滤注释，连续空格，空行，返回以';'为分隔符的list
+def comment_filter(lines):
+    multi_comment_striped = multipleline_comment_filter(lines)
+    discrete_lines = multi_comment_striped.split('\n')
     output_str = ''
     multi_space_pattern = re.compile(r'\s+')
-    for line in lines:
+    for line in discrete_lines:
         single_comment_stripped = singleline_comment_filter(line)
         if single_comment_stripped.strip() != '':
             output_str += multi_space_pattern.sub(' ',single_comment_stripped.strip('\n'))
-    output_list = output_str.split(';')
-    #for segment in output_list:
-    #    print segment + ';'
+    return output_str.split(';')
 
-
-    source = set()
-    target = set()
-    white_list_pattern = re.compile(r'(\b(lsc|jcc|zbc|ywc|yyc)\.\w+\b)', flags=re.IGNORECASE)
-    from_pattern = re.compile(r'from', flags=re.IGNORECASE)
-    #print from_pattern
-    for segment in output_list:
-        m = re.findall(white_list_pattern, segment)
-        from_m = re.search(from_pattern, segment)
-        #print type(from_m)
-        #print from_m
-        #print re.findall(white_list_pattern, segment)
-        #print m
-        if m != [] and from_m:
-            for each in m:
-            #    print segment.find(each[0])
-                if segment.find(each[0]) > segment.find(from_m.group()[0]):
-                    source.add(each[0])
-                else:
-                    target.add(each[0])
-
-    
-    for target_element in target:
-        source.remove(target_element)
-    print 'source:'
-    print source
-    print 'target:'
-    print target
-
-
+if __name__ == '__main__':
+    f = open('KHFX_KHPJBQL_KHCYCPBQ_D.sql', 'r')
+    content = f.read()
+    for each in comment_filter(content):
+        print each
 
