@@ -3,12 +3,15 @@ import re
 from comment import comment_filter
 
 #需要筛选出来的关键词，以schema名字为特征
-keyword_pattern = re.compile(r'\b(lsc|jcc|zbc|ywc|yyc)\.\w+\b', flags=re.IGNORECASE)
+keyword_pattern = re.compile(r'\b(lsc|jcc|zbc|ywc|yyc)\.\w+\b', flags = re.IGNORECASE)
 #筛选出'from'关键字，以后可能会补充 as 等其他关键字
-from_pattern = re.compile(r'from|job_dependence_table', flags=re.IGNORECASE)
+from_pattern = re.compile(r'from|source_table', flags = re.IGNORECASE)
+#筛选出视图（主要是指标层的资产负债）
+view_pattern = re.compile(r'view_\wkh\w(y|n)js_(d|m|c))', flags = re.IGNORECASE)
 
 class analyze_file:
     def __init__(self, input_file):
+        self.table_dependence = set()
         self.job_dependence = set()
         self.target = set()
         self.input_file = input_file
@@ -24,15 +27,25 @@ class analyze_file:
         self.job_name = str.upper(self.jobflow_name + '_' + self.table_name)  #13031_JCC_DSRZT_DSRZT_KHJBXX
         
 
-    def job_dependence_finder(self, line):
+    def table_dependence_finder(self, line):
         keywords = re.finditer(keyword_pattern, line)
         from_word = re.search(from_pattern, line)
         if keywords and from_word:
             for keyword in keywords:
+                keyword_literal = keyword.group().upper()
+                schema_literal ,table_without_schema_literal = keyword_literal.split('.')
+                sub_schema_literal = table_without_schema_literal.split('_')[0]
+                if schema_literal == 'LSC': #临时层有特殊的命名技巧
+                    schema_literal = 'LOAD'
+                    if sub_schema_literal not in ('EDW', 'OCRM', 'ACRM' ,'GAFEYWK', 'RPHM', 'MA', 'SMS'):
+                        sub_schema_literal = 'OTHER'
+                alist = ['13031', schema_literal, sub_schema_literal, table_without_schema_literal]
+                estimated_jobname = '_'.join(alist)
                 if  keyword.start() > from_word.start():
-                    self.job_dependence.add(keyword.group())
+                    self.table_dependence.add(keyword_literal)
+                    self.job_dependence.add(estimated_jobname)
                 else:
-                    self.target.add(keyword.group())
+                    self.target.add(keyword_literal)
 
     #load层大部分没有sql脚本，无法通过sql文件来判断，只能通过ctm配置中的表名来找
     def file_dependence_finder(self):
@@ -47,12 +60,13 @@ class analyze_file:
 
     def process_file(self):
         for line in self.lines:
-            self.job_dependence_finder(line)
-        #所有行处理完了之后，去除依赖自身的job_dependence,比如dsrzt_khjbxx
-        #self.job_dependence -= self.target
+            self.table_dependence_finder(line)
+        #所有行处理完了之后，去除依赖自身的table_dependence,比如dsrzt_khjbxx
+        #self.table_dependence -= self.target
 
     def print_result(self):
-        print 'job_dependence:'
+        print 'table_dependence:'
+        #print self.table_dependence
         print self.job_dependence
         print 'target:'
         print self.target 
