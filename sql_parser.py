@@ -3,11 +3,11 @@ import re
 from comment import comment_filter
 
 #需要筛选出来的关键词，以schema名字为特征
-keyword_pattern = re.compile(r'\b(lsc|jcc|zbc|ywc|yyc)\.\w+\b', flags = re.IGNORECASE)
+keyword_pattern = re.compile(r'\b(LSC|JCC|ZBC|YWC|YYC)\.\w+\b', flags = re.IGNORECASE)
 #筛选出'from'关键字，以后可能会补充 as 等其他关键字
-from_pattern = re.compile(r'from|source_table', flags = re.IGNORECASE)
+from_pattern = re.compile(r'FROM|SOURCE_TABLE', flags = re.IGNORECASE)
 #筛选出视图（主要是指标层的资产负债）
-view_pattern = re.compile(r'view_\wkh\w(y|n)js_(d|m|c))', flags = re.IGNORECASE)
+view_pattern = re.compile(r'VIEW_KHHZ_\w+(Y|N)RJ_(D|M|C)', flags = re.IGNORECASE)
 
 class analyze_file:
     def __init__(self, input_file):
@@ -34,6 +34,11 @@ class analyze_file:
             for keyword in keywords:
                 keyword_literal = keyword.group().upper()
                 schema_literal ,table_without_schema_literal = keyword_literal.split('.')
+                view_word = re.search(view_pattern, table_without_schema_literal)
+
+                if view_word:  #视图需转换成相应的表
+                    table_without_schema_literal = table_without_schema_literal.replace('VIEW', 'HZZBC').replace('RJ_','JS_')
+
                 sub_schema_literal = table_without_schema_literal.split('_')[0]
                 if schema_literal == 'LSC': #临时层有特殊的命名技巧
                     schema_literal = 'LOAD'
@@ -80,7 +85,7 @@ class analyze_file:
         
 
 if __name__ == '__main__':
-    f = open('DSRZT_KHJBXXLSB_L.sql', 'r')
+    f = open('sql\\ywc\\KHFX_KHPJBQL_KHXFBQ_C_006.sql', 'r')
     clean_f = analyze_file(f)
     clean_f.demo()
 
