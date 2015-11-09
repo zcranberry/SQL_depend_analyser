@@ -9,6 +9,8 @@ from_pattern = re.compile(r'FROM|SOURCE_TABLE', flags = re.IGNORECASE)
 #筛选出视图（主要是指标层的资产负债）
 view_pattern = re.compile(r'VIEW_KHHZ_\w+(Y|N)RJ_(D|M|C)', flags = re.IGNORECASE)
 
+black_list = ['13031_JCC_GGZT_GGZT_BZDMB']
+
 class analyze_file:
     def __init__(self, input_file):
         self.table_dependence = set()
@@ -32,20 +34,20 @@ class analyze_file:
         from_word = re.search(from_pattern, line)
         if keywords and from_word:
             for keyword in keywords:
-                keyword_literal = keyword.group().upper()
-                schema_literal ,table_without_schema_literal = keyword_literal.split('.')
-                view_word = re.search(view_pattern, table_without_schema_literal)
+                keyword_literal = keyword.group().upper() # JCC.DSRZT_KHJBXX
+                schema_literal ,table_without_schema_literal = keyword_literal.split('.') # JCC,  DSRZT_KHJBXX
 
+                view_word = re.search(view_pattern, table_without_schema_literal)
                 if view_word:  #视图需转换成相应的表
                     table_without_schema_literal = table_without_schema_literal.replace('VIEW', 'HZZBC').replace('RJ_','JS_')
 
-                sub_schema_literal = table_without_schema_literal.split('_')[0]
+                sub_schema_literal = table_without_schema_literal.split('_')[0]  #DSRZT
                 if schema_literal == 'LSC': #临时层有特殊的命名技巧
                     schema_literal = 'LOAD'
                     if sub_schema_literal not in ('EDW', 'OCRM', 'ACRM' ,'GAFEYWK', 'RPHM', 'MA', 'SMS'):
                         sub_schema_literal = 'OTHER'
                 alist = ['13031', schema_literal, sub_schema_literal, table_without_schema_literal]
-                estimated_jobname = '_'.join(alist)
+                estimated_jobname = '_'.join(alist)   #13031_JCC_DSRZT_DSRZT_KHJBXX
                 if  keyword.start() > from_word.start():
                     self.table_dependence.add(keyword_literal)
                     self.job_dependence.add(estimated_jobname)
