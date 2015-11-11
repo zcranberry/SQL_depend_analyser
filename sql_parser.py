@@ -87,7 +87,7 @@ class analyze_file:
         
 
 if __name__ == '__main__':
-    f = open('sql\\ywc\\KHFX_KHPJBQL_KHXFBQ_C_006.sql', 'r')
+    f = open('.\sql\ywc\KHFX_KHPJBQL_KHXFBQ_C_006.sql', 'r')
     clean_f = analyze_file(f)
     clean_f.demo()
 

@@ -37,7 +37,7 @@ def comment_filter(lines):
     return output_str.split(';')
 
 if __name__ == '__main__':
-    f = open('KHFX_KHPJBQL_KHCYCPBQ_D.sql', 'r')
+    f = open('.\sql\ywc\KHFX_KHPJBQL_KHCYCPBQ_D.sql', 'r')
     content = f.read()
     for each in comment_filter(content):
         print each

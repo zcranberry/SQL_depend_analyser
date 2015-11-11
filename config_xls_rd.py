@@ -67,8 +67,8 @@ class node:#一个节点
         print 'target:'
         for each in self.target:
             print each
-
         print ''
+
 class node_collections:
     def __init__(self):
         self.nodes= dict()
@@ -98,7 +98,7 @@ class job_dependece_graph:
 
 
 if __name__ == '__main__':
-    data = xlrd.open_workbook('RDM_AFTER_20151324.xls', encoding_override = 'cp1252')
+    data = xlrd.open_workbook('.\input\RDM_AFTER_20151324.xls', encoding_override = 'cp1252')
     #names = data.sheet_names()
     #table = data.sheets()[2] #Job Sheet
     #
