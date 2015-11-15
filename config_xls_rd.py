@@ -8,8 +8,12 @@ class job:
         self.jobflow_name, self.job_name, self.cmd_line, self.freq, self.comment, self.log = line[0], line[1], line[3], line[5], line[14], line[15]
         tmpline = re.sub(r'\s+', ' ', self.cmd_line) #去除多余空格
         try: #有不符合xxx_run.sh xxx.sql YYYYMMDD模式的会使sql_name置空 
+            if tmpline.find('py.sh') != -1: #py.sh DD XXXX.sql YYYYMMDD
+                useful_parts = tmpline.split(' ')[2:]
+                tmpline = ' '.join(useful_parts)
             self.sql_name = tmpline.split(' ')[1].split('.')[0]
         except:
+            #print self.job_name
             self.sql_name = ''
         self.estimate_logfile = r'/rdmetl/log/' + self.jobflow_name.split('_')[1].lower() + r'/%%yyyymmdd./'+self.sql_name + r'.sql.log'
 
@@ -99,33 +103,33 @@ class job_dependece_graph:
 
 if __name__ == '__main__':
     data = xlrd.open_workbook('.\input\RDM_AFTER_20151324.xls', encoding_override = 'cp1252')
-    #names = data.sheet_names()
-    #table = data.sheets()[2] #Job Sheet
-    #
-    #jobs = job_collection()
-
-
-    #for i in xrange(1, table.nrows - 1):
-    #    #jobs.append(job(table.row_values(i)))
-    #    j = job(table.row_values(i))
-    #    jobs.add(j.job_name, j)
-
-
-    #count = 0
-    #for each_job in jobs.job_set.values():
-    #    if each_job.consistency_check() != True :
-    #        print count
-    #        print each_job
-    #        print ''
-    #        count += 1
+    names = data.sheet_names()
+    table = data.sheets()[2] #Job Sheet
     
-    table = data.sheets()[4]
-    graph = job_dependece_graph()
+    jobs = job_collection()
+
 
     for i in xrange(1, table.nrows - 1):
-        graph.add_edge(table.row_values(i))
+        #jobs.append(job(table.row_values(i)))
+        j = job(table.row_values(i))
+        jobs.add(j.job_name, j)
 
-    for each in graph.graph_nodes.nodes:
-        graph.graph_nodes.nodes[each].demo()
+
+    count = 0
+    for each_job in jobs.job_set.values():
+        if each_job.consistency_check() != True :
+            print count
+            print each_job
+            print ''
+            count += 1
+################################################## 
+    #table = data.sheets()[4]
+    #graph = job_dependece_graph()
+
+    #for i in xrange(1, table.nrows - 1):
+    #    graph.add_edge(table.row_values(i))
+
+    #for each in graph.graph_nodes.nodes:
+    #    graph.graph_nodes.nodes[each].demo()
 
     

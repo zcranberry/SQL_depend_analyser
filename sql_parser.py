@@ -24,6 +24,10 @@ class analyze_file:
         self.schema = self.whole_name.split('\\')[-2]       #jcc
         self.table_name = self.name.split('.')[0]           #DSRZT_KHJBXX
         self.subname = self.table_name.split('_')[0]        #DSRZT
+        if str.upper(self.schema) == 'UNLOAD' and self.subname not in ('ACRM', 'OCRM', 'EDIP', 'FPAA', 'LSBB', 'WYSJYH', 'TYBB'):
+            self.subname = 'OTHER'
+        if str.upper(self.schema) == 'ZBC':
+            self.subname = self.table_name.split('_')[1]
         self.jobflow_name = str.upper('13031' + '_' + self.schema + '_' + self.subname) #13031_JCC_DSRZT
         self.file_dependcy = ''
         self.job_name = str.upper(self.jobflow_name + '_' + self.table_name)  #13031_JCC_DSRZT_DSRZT_KHJBXX
@@ -46,6 +50,9 @@ class analyze_file:
                     schema_literal = 'LOAD'
                     if sub_schema_literal not in ('EDW', 'OCRM', 'ACRM' ,'GAFEYWK', 'RPHM', 'MA', 'SMS'):
                         sub_schema_literal = 'OTHER'
+                #if schema_literal == 'UNLOAD' and sub_schema_literal not in ('ACRM', 'OCRM', 'EDIP', 'FPAA', 'LSBB', 'WYSJYH', 'TYBB'):
+                #    sub_schema_literal = 'OTHER'
+
                 alist = ['13031', schema_literal, sub_schema_literal, table_without_schema_literal]
                 estimated_jobname = '_'.join(alist)   #13031_JCC_DSRZT_DSRZT_KHJBXX
                 if  keyword.start() > from_word.start():
@@ -62,7 +69,7 @@ class analyze_file:
         pass
 
     def jobname_estimate(self):
-        self.job_name = '13031' + '_' + schema +  '_'+ self.subname
+        self.job_name = '13031' + '_' + schema +  '_' + self.subname
 
 
     def process_file(self):
