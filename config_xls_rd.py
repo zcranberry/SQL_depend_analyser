@@ -6,6 +6,8 @@ import re
 class job:
     def __init__(self, line):
         self.jobflow_name, self.job_name, self.cmd_line, self.freq, self.comment, self.log = line[0], line[1], line[3], line[5], line[14], line[15]
+        self.file_dependence = None
+        self.job_dependence = set()
         tmpline = re.sub(r'\s+', ' ', self.cmd_line) #去除多余空格
         try: #有不符合xxx_run.sh xxx.sql YYYYMMDD模式的会使sql_name置空 
             if tmpline.find('py.sh') != -1: #py.sh DD XXXX.sql YYYYMMDD
@@ -24,6 +26,9 @@ class job:
 
     def __str__(self):
         return unicode(self).encode('gbk')
+
+    def add_job_dependence(self, src):
+        self.job_dependence.add(src)
 
 
     def consistency_check(self):
@@ -47,9 +52,13 @@ class job_collection:
 
 #####################################################################################################################################
 
-class job_dependence:#一条边
+class job_dependence_edge:#一条边
     def __init__(self, line):
         self.edge_start, self.edge_end = line
+        if self.edge_start != '13031_LSJS_END_BAK' and self.edge_end != '13031_LSJS_BGN': #纯技术作业，过滤掉
+            pass
+
+
 
 class node:#一个节点
     def __init__(self, name):

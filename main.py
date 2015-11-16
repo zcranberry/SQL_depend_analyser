@@ -1,3 +1,4 @@
+#encoding:utf-8
 import os 
 from os.path import join
 from sql_parser import analyze_file
@@ -7,21 +8,36 @@ from config_xls_rd import *
 
 data = xlrd.open_workbook('.\input\RDM_AFTER_20151324.xls', encoding_override = 'cp1252')
 names = data.sheet_names()
-table = data.sheets()[2] #Job Sheet
 
 jobs = job_collection()
 sql_name_dict = set()
 
 
+#读excel的作业配置页
+table = data.sheets()[2] #Job Sheet
 for i in xrange(1, table.nrows - 1):
-    #jobs.append(job(table.row_values(i)))
     j = job(table.row_values(i))
     jobs.add(j.job_name, j)
     sql_name_dict.add(j.job_name)
+###################################################
 
-#for each in sql_name_dict:
-#    print each
-#print sql_name_dict
+#读excel的作业依赖配置页
+table_job_dependence = data.sheets()[4] #job_dependence sheet
+for i in xrange(1, table_job_dependence.nrows - 1):
+    line = table_job_dependence.row_values(i)
+    target, source = line[0], line[1]
+    if target != '13031_LSJS_END_BAK' and source != '13031_LSJS_BGN':
+        jobs.job_set[target].add_job_dependence(source)
+
+
+#for name, job in jobs.job_set.iteritems():
+#    print 'Job_name:' + job.job_name
+#    print 'Job_dependence:'
+#    print job.job_dependence
+#    print ''
+
+
+
 
 #count = 0
 #for each_job in jobs.job_set.values():
@@ -31,24 +47,48 @@ for i in xrange(1, table.nrows - 1):
 #        print ''
 #        count += 1
 
+#读所有的sql脚本
 file_dict = dict()
-
 for root, dirs, files in os.walk(".\sql"):
     for each_file in files:
-        #file_set.add(each_file)
-        #name_stripped_extend_name = unicode(each_file.split('.')[0])
-        #if name_stripped_extend_name not in sql_name_dict:
-        #    print root, name_stripped_extend_name
         f = open(join(root, each_file), 'r')
         analyzed_file = analyze_file(f)
         f.close()
+        analyzed_file.process_file()
         file_dict[analyzed_file.job_name] = analyzed_file
-        if analyzed_file.job_name not in sql_name_dict:
-            print analyzed_file.job_name
+        #if analyzed_file.job_name not in sql_name_dict:
+        #    print analyzed_file.job_name
+
+#for each in file_dict:
+#    print each
+#    print file_dict['13031_YWC_KHFX_KHFX_KHPJBQL_KHXFBQ_C_006'].table_dependence
+
+sorted_keys = sorted(file_dict.keys())
+count = 0
+for each in sorted_keys:
+    depenced_error = False
+    #print each
+    if each in jobs.job_set:
+        for each_job_dependence in file_dict[each].job_dependence:
+            #print each_job_dependence
+            #print file_dict[each]
+            if each_job_dependence not in jobs.job_set[each].job_dependence:
+                depenced_error = True
+        if depenced_error:
+            print 'FAIL'
+            count += 1
+        else:
+            print 'SUCC'
+
+        print each
+        file_dict[each].print_result()
+        print sorted(jobs.job_set[each].job_dependence)
+        print ''
+    else:
+        print 'Error File:' + each
 
 
 wrong_set = set()
-
 #for each in sql_name_dict:
 #    full_name = each + '.sql'
 #    if full_name not in file_set:

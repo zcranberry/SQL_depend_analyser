@@ -33,11 +33,11 @@ def comment_filter(lines):
     for line in discrete_lines:
         single_comment_stripped = singleline_comment_filter(line)
         if single_comment_stripped.strip() != '':
-            output_str += multi_space_pattern.sub(' ',single_comment_stripped.strip('\n'))
+            output_str += ' ' + multi_space_pattern.sub(' ',single_comment_stripped.strip('\n'))
     return output_str.split(';')
 
 if __name__ == '__main__':
-    f = open('.\sql\ywc\KHFX_KHPJBQL_KHCYCPBQ_D.sql', 'r')
+    f = open('.\sql\ywc\KHFX_KHPJBQL_KHFHXFBQ_C_009.sql', 'r')
     content = f.read()
     for each in comment_filter(content):
         print each
