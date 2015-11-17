@@ -21,20 +21,19 @@ class analyze_file:
         self.input_file = input_file
         self.lines = comment_filter(input_file.read())
         #以下信息都可以从文件名及路径中推测出来
-        self.whole_name = input_file.name                   #whole_name like 'e:\dir\jcc\DSRZT_KHJBXX.sql'
+        self.whole_name = str.upper(input_file.name)        #whole_name like 'e:\dir\jcc\DSRZT_KHJBXX.sql'
         self.name = self.whole_name.split('\\')[-1]         #DSRZT_KHJBXX.sql
         self.schema = self.whole_name.split('\\')[-2]       #jcc
         self.table_name = self.name.split('.')[0]           #DSRZT_KHJBXX
         self.subname = self.table_name.split('_')[0]        #DSRZT
-        if str.upper(self.schema) == 'UNLOAD' and self.subname not in ('ACRM', 'OCRM', 'EDIP', 'FPAA', 'LSBB', 'WYSJYH', 'TYBB'):
+        if self.schema in ('UNLOAD', 'YYC') and self.subname not in ('ACRM', 'OCRM', 'EDIP', 'FPAA', 'LSBB', 'WYSJYH', 'TYBB'):
             self.subname = 'OTHER'
-        if str.upper(self.schema) == 'ZBC':
+        if self.schema == 'ZBC':
             self.subname = self.table_name.split('_')[1]    #指标层的命名不对，不过错误的模式是固定的。
         self.jobflow_name = str.upper('13031' + '_' + self.schema + '_' + self.subname) #13031_JCC_DSRZT
         self.file_dependcy = ''
         self.job_name = str.upper(self.jobflow_name + '_' + self.table_name)  #13031_JCC_DSRZT_DSRZT_KHJBXX
-        if str.upper(self.schema) == 'UNLOAD':
-            self.job_name = str.upper('13031_UNLOAD_' + self.subname + '_' + self.table_name)
+        self.process_file()
         
 
     def table_dependence_finder(self, line):
@@ -79,12 +78,11 @@ class analyze_file:
         for line in self.lines:
             self.table_dependence_finder(line)
         #所有行处理完了之后，去除依赖自身的table_dependence,比如dsrzt_khjbxx
-        #self.table_dependence -= self.target
         self.job_dependence -= self.target
         self.job_dependence -= black_list 
 
     def print_result(self):
-        print 'table_dependence:'
+        print 'job dependence by sql:'
         #print self.table_dependence
         print sorted(self.job_dependence)
         #print 'target:'
@@ -92,7 +90,7 @@ class analyze_file:
 
     def demo(self):
         print 'schema:', self.schema, 'table:', self.table_name, 'jobflow_name:', self.jobflow_name, 'job_name:', self.job_name
-        self.process_file()
+        #self.process_file()
         self.print_result()
         print ''
 
