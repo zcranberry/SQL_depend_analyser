@@ -3,7 +3,7 @@
 import xlrd
 import re
 
-class job:
+class Job:
     def __init__(self, line):
         self.jobflow_name, self.job_name, self.cmd_line, self.freq, self.comment, self.log = line[0], line[1], line[3], line[5], line[14], line[15]
         self.file_dependence = None
@@ -39,7 +39,7 @@ class job:
     def __str__(self):
         return unicode(self).encode('gbk')
 
-class job_collection:
+class JobCollection:
     def __init__(self):
         self.job_set = dict()
 
@@ -116,12 +116,12 @@ if __name__ == '__main__':
     names = data.sheet_names()
     table = data.sheets()[2] #Job Sheet
     
-    jobs = job_collection()
+    jobs = JobCollection()
 
 
     for i in xrange(1, table.nrows - 1):
         #jobs.append(job(table.row_values(i)))
-        j = job(table.row_values(i))
+        j = Job(table.row_values(i))
         jobs.add(j.job_name, j)
 
 

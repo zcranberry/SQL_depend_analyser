@@ -13,7 +13,7 @@ black_list = set()
 black_list.add('13031_JCC_GGZT_GGZT_BZDMB')
 black_list.add('13031_JCC_GGZT_GGZT_BZDMYSB')
 
-class analyze_file:
+class AnalyzeFile:
     def __init__(self, input_file):
         self.table_dependence = set()
         self.job_dependence = set()
@@ -98,7 +98,7 @@ class analyze_file:
 
 if __name__ == '__main__':
     f = open('.\sql\zbc\HZZBC_KHHZ_KHKNZCFZNJS_C.sql', 'r')
-    clean_f = analyze_file(f)
+    clean_f = AnalyzeFile(f)
     clean_f.demo()
 
     
