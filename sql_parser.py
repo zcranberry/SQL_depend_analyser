@@ -85,8 +85,8 @@ class AnalyzeFile:
         print 'job dependence by sql:'
         #print self.table_dependence
         print sorted(self.job_dependence)
-        #print 'target:'
-        #print self.target 
+        print 'target:'
+        print self.target 
 
     def demo(self):
         print 'schema:', self.schema, 'table:', self.table_name, 'jobflow_name:', self.jobflow_name, 'job_name:', self.job_name
@@ -97,7 +97,7 @@ class AnalyzeFile:
         
 
 if __name__ == '__main__':
-    f = open('.\sql\zbc\HZZBC_KHHZ_KHKNZCFZNJS_C.sql', 'r')
+    f = open('.\sql\ywc\KHFX_KHYXXSFX_KHYXXSSJ_ZJBD.sql', 'r')
     clean_f = AnalyzeFile(f)
     clean_f.demo()
 
