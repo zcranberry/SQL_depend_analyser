@@ -1,6 +1,7 @@
 #encoding:utf-8
 import re
 from comment import comment_filter
+from new_comment import *
 
 #需要筛选出来的关键词，以schema名字为特征
 keyword_pattern = re.compile(r'\b(LSC|JCC|ZBC|YWC|YYC)\.\w+\b', flags = re.IGNORECASE)
@@ -19,7 +20,8 @@ class AnalyzeFile:
         self.job_dependence = set()
         self.target = set()
         self.input_file = input_file
-        self.lines = comment_filter(input_file.read())
+        #self.lines = comment_filter(input_file.read())
+        self.lines = strip_sql_comment(input_file.read())
         #以下信息都可以从文件名及路径中推测出来
         self.whole_name = str.upper(input_file.name)        #whole_name like 'e:\dir\jcc\DSRZT_KHJBXX.sql'
         self.name = self.whole_name.split('\\')[-1]         #DSRZT_KHJBXX.sql
@@ -82,11 +84,11 @@ class AnalyzeFile:
         self.job_dependence -= black_list 
 
     def print_result(self):
+        print 'target:'
+        print self.target 
         print 'job dependence by sql:'
         #print self.table_dependence
         print sorted(self.job_dependence)
-        print 'target:'
-        print self.target 
 
     def demo(self):
         print 'schema:', self.schema, 'table:', self.table_name, 'jobflow_name:', self.jobflow_name, 'job_name:', self.job_name
